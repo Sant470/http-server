@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	http "github.com/codecrafters-io/http-server-starter-go/http"
 )
@@ -17,17 +18,27 @@ func handleConn(conn net.Conn) {
 		log.Fatal("error reading request: ", err)
 	}
 	var rw http.ResponseWriter = http.NewResponse(conn)
-	switch req.Path {
+	_, query, _ := strings.Cut(req.URL, "/")
+	path, query, _ := strings.Cut(query, "/")
+	path = "/" + path
+	fmt.Println("path: ", path)
+	fmt.Println("query: ", query)
+	switch path {
 	case "/":
-		res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusOK, "OK", http.CRLF, http.CRLF)
-		if _, err := rw.Write([]byte(res)); err != nil {
-			log.Fatal("error occurred while sending response: ", err)
+		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeaders(map[string]interface{}{})
+	case "/echo":
+		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeaders(map[string]interface{}{
+			"Content-Type": "text/plain",
+			"Length":       len(query),
+		})
+		if _, err := rw.Write([]byte(query)); err != nil {
+			log.Println("error writing body: ", err)
 		}
 	default:
-		res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusNotFound, "Not Found", http.CRLF, http.CRLF)
-		if _, err := rw.Write([]byte(res)); err != nil {
-			log.Fatal("error occurred while sending response: ", err)
-		}
+		rw.WriteHeader(http.StatusNotFound)
+		rw.WriteHeaders(map[string]interface{}{})
 	}
 }
 

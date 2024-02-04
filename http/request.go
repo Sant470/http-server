@@ -7,7 +7,7 @@ import (
 
 type Request struct {
 	Method      string
-	Path        string
+	URL         string
 	HTTPVersion string
 }
 
@@ -16,7 +16,7 @@ func ReadRequest(r *bufio.Reader) (*Request, error) {
 	barr, _ := r.ReadBytes('\n')
 	startLine := strings.Split(string(barr), " ")
 	req.Method = startLine[0]
-	req.Path = startLine[1]
+	req.URL = startLine[1]
 	req.HTTPVersion = startLine[2]
 	return req, nil
 }
