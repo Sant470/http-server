@@ -10,7 +10,8 @@ const (
 )
 
 const (
-	StatusOK = 200
+	StatusOK       = 200
+	StatusNotFound = 404
 )
 
 type ResponseWriter interface {

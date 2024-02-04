@@ -10,14 +10,24 @@ import (
 	http "github.com/codecrafters-io/http-server-starter-go/http"
 )
 
-// HTTP/1.1 200 OK\r\n\r\n
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	http.ReadRequest(bufio.NewReader(conn))
+	req, err := http.ReadRequest(bufio.NewReader(conn))
+	if err != nil {
+		log.Fatal("error reading request: ", err)
+	}
 	var rw http.ResponseWriter = http.NewResponse(conn)
-	res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusOK, "OK", http.CRLF, http.CRLF)
-	if _, err := rw.Write([]byte(res)); err != nil {
-		log.Fatal("error occurred while sending response: ", err)
+	switch req.Path {
+	case "/":
+		res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusOK, "OK", http.CRLF, http.CRLF)
+		if _, err := rw.Write([]byte(res)); err != nil {
+			log.Fatal("error occurred while sending response: ", err)
+		}
+	default:
+		res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusNotFound, "Not Found", http.CRLF, http.CRLF)
+		if _, err := rw.Write([]byte(res)); err != nil {
+			log.Fatal("error occurred while sending response: ", err)
+		}
 	}
 }
 
@@ -27,7 +37,6 @@ func main() {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
-	defer l.Close()
 	conn, err := l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
