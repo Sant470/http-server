@@ -30,8 +30,8 @@ func handleConn(conn net.Conn) {
 	case "/echo":
 		rw.WriteHeader(http.StatusOK)
 		rw.WriteHeaders(map[string]interface{}{
-			"Content-Type": "text/plain",
-			"Length":       len(query),
+			"Content-Type":   "text/plain",
+			"Content-Length": len(query),
 		})
 		if _, err := rw.Write([]byte(query)); err != nil {
 			log.Println("error writing body: ", err)
