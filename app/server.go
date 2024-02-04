@@ -21,12 +21,16 @@ func handleConn(conn net.Conn) {
 	_, query, _ := strings.Cut(req.URL, "/")
 	path, query, _ := strings.Cut(query, "/")
 	path = "/" + path
-	fmt.Println("path: ", path)
-	fmt.Println("query: ", query)
 	switch path {
 	case "/":
 		rw.WriteHeader(http.StatusOK)
-		rw.WriteHeaders(map[string]interface{}{})
+		rw.WriteHeaders(map[string]interface{}{
+			"Content-Type":   "text/plain",
+			"Content-Length": len(req.Headers["User-Agent"]),
+		})
+		if _, err := rw.Write([]byte(req.Headers["User-Agent"])); err != nil {
+			log.Println("error writing body: ", err)
+		}
 	case "/echo":
 		rw.WriteHeader(http.StatusOK)
 		rw.WriteHeaders(map[string]interface{}{
