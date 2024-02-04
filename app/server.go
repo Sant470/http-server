@@ -12,6 +12,7 @@ import (
 
 // HTTP/1.1 200 OK\r\n\r\n
 func handleConn(conn net.Conn) {
+	defer conn.Close()
 	http.ReadRequest(bufio.NewReader(conn))
 	var rw http.ResponseWriter = http.NewResponse(conn)
 	res := fmt.Sprintf("%s %d %s%s%s", http.Protocal, http.StatusOK, "OK", http.CRLF, http.CRLF)
@@ -26,6 +27,7 @@ func main() {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
+	defer l.Close()
 	conn, err := l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())

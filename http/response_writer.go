@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	Protocal = "HTTP/1/1"
+	Protocal = "HTTP/1.1"
 	CRLF     = "\r\n"
 )
 
