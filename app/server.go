@@ -24,13 +24,7 @@ func handleConn(conn net.Conn) {
 	switch path {
 	case "/":
 		rw.WriteHeader(http.StatusOK)
-		rw.WriteHeaders(map[string]interface{}{
-			"Content-Type":   "text/plain",
-			"Content-Length": len(req.Headers["User-Agent"]),
-		})
-		if _, err := rw.Write([]byte(req.Headers["User-Agent"])); err != nil {
-			log.Println("error writing body: ", err)
-		}
+		rw.WriteHeaders(map[string]interface{}{})
 	case "/echo":
 		rw.WriteHeader(http.StatusOK)
 		rw.WriteHeaders(map[string]interface{}{
@@ -38,6 +32,16 @@ func handleConn(conn net.Conn) {
 			"Content-Length": len(query),
 		})
 		if _, err := rw.Write([]byte(query)); err != nil {
+			log.Println("error writing body: ", err)
+		}
+	case "/user-agent":
+		agent := req.Headers["User-Agent"]
+		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeaders(map[string]interface{}{
+			"Content-Type":   "text/plain",
+			"Content-Length": len(agent),
+		})
+		if _, err := rw.Write([]byte(agent)); err != nil {
 			log.Println("error writing body: ", err)
 		}
 	default:
