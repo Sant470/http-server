@@ -51,12 +51,13 @@ func handleConn(conn net.Conn) {
 	case "/files":
 		path := filepath.Join(dir, query)
 		fi, err := os.Stat(path)
-		if err == os.ErrNotExist {
+		if err != nil {
 			rw.WriteHeader(http.StatusNotFound)
 			rw.WriteHeaders(map[string]interface{}{})
 			break
 		}
 		file, _ := os.Open(path)
+		defer file.Close()
 		rw.WriteHeader(http.StatusOK)
 		rw.WriteHeaders(map[string]interface{}{
 			"Content-Type":   "application/octet-stream",
