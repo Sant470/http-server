@@ -2,14 +2,18 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 
 	http "github.com/codecrafters-io/http-server-starter-go/http"
 )
+
+var dir string
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
@@ -31,7 +35,7 @@ func handleConn(conn net.Conn) {
 			"Content-Type":   "text/plain",
 			"Content-Length": len(query),
 		})
-		if _, err := rw.Write([]byte(query)); err != nil {
+		if _, err := rw.Write(strings.NewReader(query)); err != nil {
 			log.Println("error writing body: ", err)
 		}
 	case "/user-agent":
@@ -41,7 +45,24 @@ func handleConn(conn net.Conn) {
 			"Content-Type":   "text/plain",
 			"Content-Length": len(agent),
 		})
-		if _, err := rw.Write([]byte(agent)); err != nil {
+		if _, err := rw.Write(strings.NewReader(agent)); err != nil {
+			log.Println("error writing body: ", err)
+		}
+	case "/files":
+		path := filepath.Join(dir, query)
+		fi, err := os.Stat(path)
+		if err == os.ErrNotExist {
+			rw.WriteHeader(http.StatusNotFound)
+			rw.WriteHeaders(map[string]interface{}{})
+			break
+		}
+		file, _ := os.Open(path)
+		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeaders(map[string]interface{}{
+			"Content-Type":   "application/octet-stream",
+			"Content-Length": fi.Size(),
+		})
+		if _, err := rw.Write(file); err != nil {
 			log.Println("error writing body: ", err)
 		}
 	default:
@@ -51,6 +72,8 @@ func handleConn(conn net.Conn) {
 }
 
 func main() {
+	flag.StringVar(&dir, "directory", "", "dir name")
+	flag.Parse()
 	l, err := net.Listen("tcp", "localhost:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")

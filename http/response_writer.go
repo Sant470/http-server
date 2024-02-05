@@ -2,26 +2,23 @@ package http
 
 import (
 	"fmt"
+	"io"
 	"net"
 )
 
 const (
 	Protocal = "HTTP/1.1"
 	CRLF     = "\r\n"
-)
-
-const (
+	//status code
 	StatusOK       = 200
 	StatusNotFound = 404
-)
-
-const (
+	// string status
 	OK       = "OK"
 	NOTFOUND = "Not Found"
 )
 
 type ResponseWriter interface {
-	Write([]byte) (int, error)
+	Write(io.Reader) (int64, error)
 	WriteHeader(statusCode int)
 	WriteHeaders(map[string]interface{})
 }
@@ -53,6 +50,6 @@ func (r *response) WriteHeaders(headers map[string]interface{}) {
 	r.conn.Write([]byte(CRLF))
 }
 
-func (r *response) Write(barr []byte) (int, error) {
-	return r.conn.Write(barr)
+func (r *response) Write(reader io.Reader) (int64, error) {
+	return io.Copy(r.conn, reader)
 }
