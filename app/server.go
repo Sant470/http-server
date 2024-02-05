@@ -52,6 +52,7 @@ func handleConn(conn net.Conn) {
 		if req.Method == "POST" {
 			fmt.Println("body: ", string(req.Body))
 			path := filepath.Join(dir, query)
+			fmt.Println("path: ", path)
 			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 			if err != nil {
 				fmt.Println("got some error here: ", err)
