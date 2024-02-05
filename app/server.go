@@ -62,13 +62,11 @@ func handleConn(conn net.Conn) {
 			if _, err := io.Copy(file, bytes.NewReader(req.Body)); err != nil {
 				fmt.Println("error: ", err)
 				rw.WriteHeader(http.InternalServerError)
+				rw.WriteHeaders(map[string]interface{}{})
 				break
 			}
-			// _, err = file.Write(req.Body)
-			// if err != nil {
-			// 	fmt.Println("error: ", err)
-			// }
 			rw.WriteHeader(http.StatusCreated)
+			rw.WriteHeaders(map[string]interface{}{})
 		}
 		if req.Method == "GET" {
 			path := filepath.Join(dir, query)
