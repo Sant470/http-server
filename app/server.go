@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -57,11 +59,15 @@ func handleConn(conn net.Conn) {
 				break
 			}
 			defer file.Close()
-			fmt.Println("got here: awesome ....")
-			_, err = file.Write(req.Body)
-			if err != nil {
+			if _, err := io.Copy(file, bytes.NewReader(req.Body)); err != nil {
 				fmt.Println("error: ", err)
+				rw.WriteHeader(http.InternalServerError)
+				break
 			}
+			// _, err = file.Write(req.Body)
+			// if err != nil {
+			// 	fmt.Println("error: ", err)
+			// }
 			rw.WriteHeader(http.StatusCreated)
 		}
 		if req.Method == "GET" {
