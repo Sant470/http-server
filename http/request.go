@@ -12,7 +12,7 @@ type Request struct {
 	URL         string
 	HTTPVersion string
 	Headers     map[string]string
-	Body        []byte
+	Body        []byte // make it ReadCloser
 }
 
 func (r *Request) readBody() {

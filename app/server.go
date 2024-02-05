@@ -15,6 +15,10 @@ import (
 	http "github.com/codecrafters-io/http-server-starter-go/http"
 )
 
+/*
+TODO:  Define Mux and Handler type
+*/
+
 var dir string
 
 func handleConn(conn net.Conn) {
@@ -56,11 +60,11 @@ func handleConn(conn net.Conn) {
 			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 			if err != nil {
 				rw.WriteHeader(http.InternalServerError)
+				rw.WriteHeaders(map[string]interface{}{})
 				break
 			}
 			defer file.Close()
 			if _, err := io.Copy(file, bytes.NewReader(req.Body)); err != nil {
-				fmt.Println("error: ", err)
 				rw.WriteHeader(http.InternalServerError)
 				rw.WriteHeaders(map[string]interface{}{})
 				break
