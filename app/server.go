@@ -57,7 +57,10 @@ func handleConn(conn net.Conn) {
 				break
 			}
 			defer file.Close()
-			file.Write(req.Body)
+			_, err = file.Write(req.Body)
+			if err != nil {
+				fmt.Println("error: ", err)
+			}
 			rw.WriteHeader(http.StatusCreated)
 		}
 		if req.Method == "GET" {
