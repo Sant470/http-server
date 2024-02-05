@@ -20,7 +20,8 @@ func (r *Request) readHeaders() {
 		if len(els) < 2 {
 			break
 		}
-		r.Headers[els[0]] = strings.Join(els[1:], ":")
+		val := strings.Join(els[1:], ":")
+		r.Headers[els[0]] = strings.Trim(val, " ")
 	}
 }
 
