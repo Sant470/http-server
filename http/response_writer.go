@@ -10,11 +10,15 @@ const (
 	Protocal = "HTTP/1.1"
 	CRLF     = "\r\n"
 	//status code
-	StatusOK       = 200
-	StatusNotFound = 404
+	StatusOK            = 200
+	StatusCreated       = 201
+	StatusNotFound      = 404
+	InternalServerError = 500
 	// string status
-	OK       = "OK"
-	NOTFOUND = "Not Found"
+	OK                  = "OK"
+	NOTFOUND            = "Not Found"
+	CREATED             = "Created"
+	INTERNALSERVERERROR = "Internal Server Error"
 )
 
 type ResponseWriter interface {
@@ -38,6 +42,10 @@ func (r *response) WriteHeader(statusCode int) {
 		statusString = OK
 	case StatusNotFound:
 		statusString = NOTFOUND
+	case StatusCreated:
+		statusString = CREATED
+	case InternalServerError:
+		statusString = INTERNALSERVERERROR
 	}
 	header := fmt.Sprintf("%s %d %s%s", Protocal, statusCode, statusString, CRLF)
 	r.conn.Write([]byte(header))

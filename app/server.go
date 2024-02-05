@@ -49,22 +49,35 @@ func handleConn(conn net.Conn) {
 			log.Println("error writing body: ", err)
 		}
 	case "/files":
-		path := filepath.Join(dir, query)
-		fi, err := os.Stat(path)
-		if err != nil {
-			rw.WriteHeader(http.StatusNotFound)
-			rw.WriteHeaders(map[string]interface{}{})
-			break
+		if req.Method == "POST" {
+			path := filepath.Join(dir, query)
+			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+			if err != nil {
+				rw.WriteHeader(http.InternalServerError)
+				break
+			}
+			defer file.Close()
+			file.Write(req.Body)
+			rw.WriteHeader(http.StatusCreated)
 		}
-		file, _ := os.Open(path)
-		defer file.Close()
-		rw.WriteHeader(http.StatusOK)
-		rw.WriteHeaders(map[string]interface{}{
-			"Content-Type":   "application/octet-stream",
-			"Content-Length": fi.Size(),
-		})
-		if _, err := rw.Write(file); err != nil {
-			log.Println("error writing body: ", err)
+		if req.Method == "GET" {
+			path := filepath.Join(dir, query)
+			fi, err := os.Stat(path)
+			if err != nil {
+				rw.WriteHeader(http.StatusNotFound)
+				rw.WriteHeaders(map[string]interface{}{})
+				break
+			}
+			file, _ := os.Open(path)
+			defer file.Close()
+			rw.WriteHeader(http.StatusOK)
+			rw.WriteHeaders(map[string]interface{}{
+				"Content-Type":   "application/octet-stream",
+				"Content-Length": fi.Size(),
+			})
+			if _, err := rw.Write(file); err != nil {
+				log.Println("error writing body: ", err)
+			}
 		}
 	default:
 		rw.WriteHeader(http.StatusNotFound)

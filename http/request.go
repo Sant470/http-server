@@ -2,20 +2,29 @@ package http
 
 import (
 	"bufio"
+	"strconv"
 	"strings"
 )
 
 type Request struct {
+	reader      *bufio.Reader
 	Method      string
 	URL         string
 	HTTPVersion string
 	Headers     map[string]string
-	reader      *bufio.Reader
+	Body        []byte
+}
+
+func (r *Request) readBody() {
+	length, _ := strconv.Atoi(r.Headers["Content-Length"])
+	barr := make([]byte, length)
+	r.reader.Read(barr)
+	r.Body = barr
 }
 
 func (r *Request) readHeaders() {
 	for {
-		barr, _ := r.reader.ReadBytes('\n')
+		barr, _ := r.reader.ReadString('\n')
 		els := strings.Split(string(barr), ":")
 		if len(els) < 2 {
 			break
@@ -32,5 +41,8 @@ func ReadRequest(r *bufio.Reader) (*Request, error) {
 	req.URL = startLine[1]
 	req.HTTPVersion = startLine[2]
 	req.readHeaders()
+	if req.Method == "POST" {
+		req.readBody()
+	}
 	return req, nil
 }
